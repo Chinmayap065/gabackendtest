@@ -30,15 +30,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // This line applies the global CORS settings from the bean below
+            // This applies the global CORS settings from the bean below
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // These specific paths are public and do not require a token
+                // These specific paths are public
                 .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // All other API requests require a valid token
+                // All other API requests require authentication
                 .anyRequest().authenticated()
             );
 
@@ -46,18 +46,18 @@ public class SecurityConfig {
         return http.build();
     }
     
-    // This bean defines the global CORS policy for the entire application
+    // This bean defines the global CORS policy
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow requests from your frontend's origin
+        // This is the crucial line: it allows your local frontend to make requests
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // This line applies the CORS configuration to all of your API endpoints
+        // Apply this configuration to all API endpoints
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
